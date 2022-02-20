@@ -1,0 +1,14 @@
+{% extends 'testor/base.html' %}
+
+{% block main %}
+        {% for i in object.diagram %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"
+             fill="{% if i is None %}gray{% elif i is True %}green{% elif i is False %}red{% endif %}"
+             class="bi bi-record-fill"
+             viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10z"/>
+        </svg>
+    {% endfor %}
+    <h1>Тест завершен</h1>
+    <p>Вы набрали {{ object.point }} баллов из {{ object.total }}. Это {{ percent }}%</p>
+{% endblock %}

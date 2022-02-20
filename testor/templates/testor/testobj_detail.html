@@ -1,0 +1,9 @@
+{% extends "testor/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main %}
+    <h1>Тест {{ object.name }}</h1>
+    <h5>{{ object.description }}</h5>
+    {% if object.button %}<a href="{% url 'transit' pk=object.pk %}"><button type="button" class="btn btn-danger">{{ object.button }}</button></a>{% endif %}
+{% endblock %}

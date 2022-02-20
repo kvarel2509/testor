@@ -1,0 +1,15 @@
+{% extends "testor/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+
+{% block main %}
+<h3>Далее перечислены тесты {% if not topic_all %}по теме {{ topic_name }}{% else %}по всем темам{% endif %}</h3>
+    <ul>
+    {% for test in object_list %}
+        <li><strong><a href="{{ test.get_absolute_url }}">{{ test.name }}</a></strong></li>
+        <p><small>{{ test.description }}</small></p>
+    {% endfor %}
+    </ul>
+
+{% endblock %}

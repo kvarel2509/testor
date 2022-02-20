@@ -1,0 +1,6 @@
+<ul class="list-group">
+    <li class="list-group-item"><a href="{% url 'main' %}">Все</a></li>
+    {% for topic in topics %}
+        <li class="list-group-item"><a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a></li>
+    {% endfor %}
+</ul>
