@@ -14,28 +14,31 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Тестовое задание: сайт для прохождения тестов</a>
+        <strong style="color: white">{% if user.is_authenticated %}{{ user.username }} <a href="{% url 'logout' %}">Выйти</a>{% else %}<a href="{% url 'login' %}">Войти</a>{% endif %}</strong>
     </div>
 </nav>
 
 <!-- КОНТЕНТ -->
 <div class="container">
-    <div class="row">
+    {% block content %}
+        <div class="row">
 
 
-        <!-- БЛОК МЕНЮ -->
-        <div class="col-3">
-            {% block menu %}
-                {% show_menu %}
-            {% endblock %}
+            <!-- БЛОК МЕНЮ -->
+            <div class="col-3">
+                {% block menu %}
+                    {% show_menu %}
+                {% endblock %}
+            </div>
+
+
+            <!-- БЛОК ОСНОВНОЙ -->
+            <div class="col-9">
+                {% block main %}
+                {% endblock main %}
+            </div>
         </div>
-
-
-        <!-- БЛОК ОСНОВНОЙ -->
-        <div class="col-9">
-            {% block main %}
-            {% endblock main %}
-        </div>
-    </div>
+    {% endblock %}
 </div>
 
 

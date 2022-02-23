@@ -1,0 +1,12 @@
+{% extends 'testor/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn bg-danger">Войти</button>
+
+    </form>
+    <a href="{% url 'registration' %}"><button class="btn bg-warning">Регистрация</button></a>
+{% endblock %}

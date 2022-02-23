@@ -1,3 +1,6 @@
+from django.contrib.auth import logout, login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView
 from django.db.models import Case, When, F, Value, Exists
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import redirect
@@ -20,6 +23,7 @@ class MainView(generic.ListView):
         context['title'] = 'Список тем'
         context['topics'] = Topic.objects.all()
         context['topic_all'] = False if 'pk' in self.kwargs else True
+        context['user'] = self.request.user
         return context
 
 
@@ -46,7 +50,7 @@ class CreateTestingView(generic.View):
 
     def get(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:
-            user = User.objects.get(pk=self.request.user.pk)
+            user = request.user
             test = TestObj.objects.get(pk=self.kwargs['pk'])
             # Проверяем, есть ли в базе такой уже начатый тест
             testing = Testing.objects.filter(user=user, testobj=test)
@@ -116,5 +120,20 @@ class ResultView(generic.detail.SingleObjectMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['percent'] = self.object.point / self.object.total * 100
+        context['percent'] = self.object.point / self.object.total * 100 if self.object.total != 0 else 0
         return context
+
+
+def logout_view(request):
+    logout(request)
+    return redirect(reverse_lazy('main'))
+
+
+class RegistrationView(generic.CreateView):
+    form_class = UserCreationForm
+    template_name = 'testor/login.html'
+    success_url = reverse_lazy('main')
+
+    def get_success_url(self):
+        login(self.request, user=self.object)
+        return super().get_success_url()
