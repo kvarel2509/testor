@@ -35,38 +35,35 @@ class TestListView(generics.ListCreateAPIView):
     serializer_class = TestListSerializer
     queryset = TestObj.objects.all()
 
+    def get_queryset(self):
+        if 'pk' in self.kwargs:
+            return TestObj.objects.filter(topic=self.kwargs['pk'])
+        return TestObj.objects.all()
 
-class TestListCategory(generics.ListAPIView):
-    """Показывает тесты в рамках категории"""
-    serializer_class = TestListSerializer
+
+class TestRetrieveView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = TestRetrieveSerializer
+    queryset = TestObj.objects.all()
+
+
+class QuestionForTestListView(generics.ListCreateAPIView):
+    serializer_class = QuestionSerializer
 
     def get_queryset(self):
-        return TestObj.objects.filter(topic=self.kwargs['pk'])
+        return Question.objects.filter(testobj=self.kwargs['pk'])
+
+    def perform_create(self, serializer):
+        serializer.save(testobj=get_object_or_404(TestObj, pk=self.kwargs['pk']))
 
 
-class QuestionListView(views.APIView):
+class QuestionDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
 
-    def get(self, request, *args, **kwargs):
-        obj = get_object_or_404(TestObj, pk=kwargs['pk'])
-        question_list = obj.question_set.all().prefetch_related()
-        new_question_list = []
-        for i in question_list:
-            i.answers = i.answer_set.all().values('text')
-            new_question_list.append(i)
-        data = QuestionSerializer(question_list, many=True).data
-        return Response({'id': obj.pk, 'Название': obj.name, 'Описание': obj.description, 'questions': data})
 
-    def post(self, request, *args, **kwargs):
-        obj = get_object_or_404(TestObj, pk=kwargs['pk'])
-        data = QuestionSerializer2(data=request.data, many=True)
-        data.is_valid(raise_exception=True)
-        saved_questions = data.save(testobj=obj)
-        result = []
-        for i in saved_questions:
-            data = model_to_dict(i)
-            data['answers'] = i.answer_set.all().values('text', 'status')
-            result.append(data)
-        return Response(result)
+class AnswerView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Answer.objects.all()
+    serializer_class = AnswerSerializer
 
 
 class RunTestView(views.APIView):
