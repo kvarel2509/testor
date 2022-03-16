@@ -1,0 +1,16 @@
+{% extends 'api_testor/base.html' %}
+
+{% block title %}
+    Список доступных тестов
+{% endblock %}
+
+{% block main %}
+<h3>Далее перечислены тесты {% if not topic_all %}по теме {{ topic_name }}{% else %}по всем темам{% endif %}</h3>
+    <ul>
+    {% for test in test_list %}
+        <li><strong><a href="{% url 'api_test_detail' test.pk %}">{{ test.name }}</a></strong></li>
+        <p><small>{{ test.description }}</small></p>
+    {% endfor %}
+    </ul>
+
+{% endblock %}

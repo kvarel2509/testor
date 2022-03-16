@@ -1,0 +1,66 @@
+{% load menu %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock title %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+</head>
+<body>
+
+<!-- НАВБАР -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'api_test_list' %}">Тестовое задание: сайт для прохождения тестов</a>
+        <a class="button btn bg-success" href="{% url 'api_test_create' %}">Создать тест</a>
+        <strong style="color: white">
+            {% if user.is_authenticated %}{{ user.username }} <a href="{% url 'api_logout' %}">Выйти</a>{% else %}
+                <a href="{% url 'api_login' %}">Войти</a>{% endif %}</strong>
+    </div>
+</nav>
+
+<!-- КОНТЕНТ -->
+<div class="container">
+    {% block content %}
+        <div class="row">
+
+
+            <!-- БЛОК МЕНЮ -->
+            <div class="col-3">
+
+                {% block menu %}
+                    <ul class="list-group">
+                        <li class="list-group-item"><a href="{% url 'api_test_list' %}">Все</a></li>
+                        {% for topic in topic_list %}
+                            <li class="list-group-item"><a href="{% url 'api_test_list_filter' topic.pk %}">{{ topic.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+
+                {% endblock %}
+            </div>
+
+
+            <!-- БЛОК ОСНОВНОЙ -->
+            <div class="col-9">
+                {% block main %}
+                {% endblock main %}
+            </div>
+        </div>
+    {% endblock %}
+</div>
+
+
+<!-- ТЕХНИЧЕСКАЯ ИНФА -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+        integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+        crossorigin="anonymous"></script>
+</body>
+</html>

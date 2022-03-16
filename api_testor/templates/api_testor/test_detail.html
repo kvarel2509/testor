@@ -1,0 +1,11 @@
+{% extends 'api_testor/base.html' %}
+
+{% block title %}Описание теста{% endblock %}
+
+{% block main %}
+    <h1>Тест {{ object.name }}</h1>
+    <h5>{{ object.description }}</h5>
+    {% if request.user.is_authenticated %}
+        <a href="{% url 'api_test_run' pk=object.pk %}"><button type="button" class="btn btn-danger">Запустить</button></a>
+    {% endif %}
+{% endblock %}

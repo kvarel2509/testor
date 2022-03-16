@@ -19,6 +19,7 @@ class RegistrationUserSerializer(serializers.ModelSerializer):
 
 
 class AnswerSerializer(serializers.ModelSerializer):
+    status = serializers.BooleanField(required=False, default=False)
 
     class Meta:
         model = Answer
@@ -31,6 +32,7 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ['pk', 'text', 'many', 'answer']
+        read_only_fields = ['many']
 
     def save_answers(self, answers, instance, positive_count=0):
         for i in range(len(answers)):
@@ -89,10 +91,10 @@ class TestRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TestObj
-        fields = ['name', 'description', 'topic', 'question']
+        fields = ['pk', 'name', 'description', 'topic', 'question']
 
 
-class RunTestingSerializer(serializers.Serializer):
+class RunTestingPostSerializer(serializers.Serializer):
     answers = serializers.ListField(child=serializers.IntegerField())
 
     def validate_answers(self, value):
@@ -103,8 +105,16 @@ class RunTestingSerializer(serializers.Serializer):
         return value
 
 
-class ResultTestingView(serializers.ModelSerializer):
+class TopicListSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Testing
-        fields = ['point', 'total', 'diagram']
+        model = Topic
+        fields = ['pk', 'name']
+
+
+class TopicRetrieveSerializer(serializers.ModelSerializer):
+    tests = TestListSerializer(read_only=True, many=True, source='testobj_set')
+
+    class Meta:
+        model = Topic
+        fields = ['pk', 'name', 'tests']

@@ -13,5 +13,6 @@ urlpatterns = [
     path('auth/login/', views.LoginView.as_view(template_name='testor/login.html'), name='login'),
     path('auth/logout/', views.logout_view, name='logout'),
     path('auth/registration/', views.RegistrationView.as_view(), name='registration'),
-    path('api/', include('api.urls'))
+    path('api/', include('api.urls')),
+    path('testor/', include('api_testor.urls'))
     ]

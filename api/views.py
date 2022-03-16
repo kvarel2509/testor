@@ -20,7 +20,6 @@ class RegistrationView(views.APIView):
 
 
 class GetToken(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated]
     queryset = User.objects.all()
 
     def get(self, request, *args, **kwargs):
@@ -28,6 +27,16 @@ class GetToken(generics.GenericAPIView):
         data = RegistrationUserSerializer(obj).data
         data['token'] = 'Token ' + Token.objects.get(user_id=obj.pk).key
         return Response(data=data)
+
+
+class TopicListView(generics.ListAPIView):
+    queryset = Topic.objects.all()
+    serializer_class = TopicListSerializer
+
+
+class TopicRetrieveView(generics.RetrieveAPIView):
+    queryset = Topic.objects.all()
+    serializer_class = TopicRetrieveSerializer
 
 
 class TestListView(generics.ListCreateAPIView):
@@ -82,20 +91,24 @@ class RunTestView(views.APIView):
         return obj
 
     def get(self, request, *args, **kwargs):
+
         testobj = get_object_or_404(TestObj, pk=kwargs['pk'])
         obj = Testing.objects.filter(user=request.user, testobj=testobj)
         if not obj:
             obj = self.create_new_testing(request, testobj)
         else:
             obj = obj.get()
+        result = {'pk': obj.pk,
+                  'total': obj.total,
+                  'distant': obj.distant,
+                  'point': obj.point,
+                  'diagram': obj.diagram,
+                  'question': {}}
         if obj.question:
             question_pk = obj.question[-1]
             question_obj = Question.objects.get(pk=question_pk)
-            result = {'diagram': obj.diagram,
-                      'text': question_obj.text,
-                      'answers': question_obj.answer_set.all().values('pk', 'text')}
-            return Response(result)
-        return redirect(reverse_lazy('api_result', kwargs={'pk': testobj.pk}))
+            result['question'] = QuestionSerializer(question_obj).data
+        return Response(result)
 
     def post(self, request, *args, **kwargs):
         testobj = get_object_or_404(TestObj, pk=kwargs['pk'])
@@ -104,12 +117,12 @@ class RunTestView(views.APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         obj = obj.get()
         if not obj.question:
-            return Response({'error': 'Все вопросы закончились'}, status=status.HTTP_412_PRECONDITION_FAILED)
+            return Response({'error': 'Все вопросы закончились'}, status=status.HTTP_204_NO_CONTENT)
         question_pk = obj.question[-1]
         question_obj = Question.objects.get(pk=question_pk)
         answer_list = question_obj.answer_set.all()
         bool(answer_list)
-        data = RunTestingSerializer(data=request.data, context={"answer_list": answer_list})
+        data = RunTestingPostSerializer(data=request.data, context={"answer_list": answer_list})
         if data.is_valid():
             user_answers = sorted(data.validated_data['answers'])
             positive_answers = sorted([i.pk for i in answer_list.filter(status=True)])
@@ -118,18 +131,10 @@ class RunTestView(views.APIView):
             del obj.question[-1]
             if user_answers == positive_answers:
                 obj.point += 1
-                obj.diagram[obj.distant-1] = True
+                obj.diagram[obj.distant - 1] = True
 
             else:
                 obj.diagram[obj.distant - 1] = False
             obj.save()
-            return redirect(reverse_lazy('api_run_test', kwargs={'pk': testobj.pk}))
-        return Response(data.errors)
-
-
-class ResultView(views.APIView):
-    def get(self, request, *args, **kwargs):
-        testobj = get_object_or_404(TestObj, pk=kwargs['pk'])
-        obj = Testing.objects.filter(user=request.user, testobj=testobj)
-        ser_data = ResultTestingView(obj.get()).data
-        return Response({'result': ser_data})
+            return Response({'status': 'ok'}, status=status.HTTP_201_CREATED)
+        return Response(data.errors, status.HTTP_205_RESET_CONTENT)
